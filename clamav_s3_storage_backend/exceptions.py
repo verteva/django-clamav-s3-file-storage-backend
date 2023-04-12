@@ -1,0 +1,3 @@
+
+class ClamAvScanFailed(Exception):
+    pass

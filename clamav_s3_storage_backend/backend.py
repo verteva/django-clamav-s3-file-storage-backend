@@ -28,8 +28,6 @@ class ClamAvS3Boto3Storage(S3Boto3Storage):
         Returns:
             Optional[str]: None if scan passed. Error message if scan failed.
         """
-        # implement me
-        # TODO is content file like or binary?
         clamd_client = pyclamd.ClamdAgnostic()
         scan_result_msg = clamd_client.scan_stream(content)
         return scan_result_msg

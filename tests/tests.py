@@ -30,8 +30,6 @@ class ClamavS3Boto3StorageTests(TestCase):
         Test saving a file
         """
         
-
-
         # create file (bytestring) with eicar flag
         name='file/with/no/virus'
         with tempfile.NamedTemporaryFile() as file_with_no_virus:

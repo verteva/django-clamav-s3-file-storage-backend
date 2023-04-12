@@ -1,5 +1,5 @@
 # django-clamav-s3-file-storage-backend
-An extension of storages.backends.s3boto3.S3Boto3Storage that scans files using ClamAV pre-upload.
+An extension of `storages.backends.s3boto3.S3Boto3Storage` that scans files using ClamAV pre-upload.
 
 ## Prerequisites
 
@@ -8,13 +8,13 @@ The ``clamav-daemon`` must be running on the local machine.
 ## Installation
 
 Standard python installation:
-        python setup.py install    
-... or install using pip:
-        pip install django-clamav-s3-file-storage-backend
+        `python setup.py install`
+or install using pip:
+        `pip install django-clamav-s3-file-storage-backend`.
 
 ## Configuration
 
-This storage backend is a drop in replacement for S3Boto3Storage.
+This storage backend is a drop in replacement for `S3Boto3Storage`.
 
 ## Tests
 
@@ -27,4 +27,3 @@ This storage backend will raise a `ClamAvScanFailed` exception if the scan faile
 ## Acknowledgements 
 
 Boilerplate code copied from https://github.com/musashiXXX/django-clamav-upload .
-

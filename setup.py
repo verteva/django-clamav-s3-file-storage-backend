@@ -15,7 +15,7 @@ setup(
         'Django<4.0.0,>=3.2.17',
         'pyClamd==0.4.0',
         'django-storages==1.13.2',
-        'boto3>1.20.*',
+        'boto3>=1.20',
     ],
     keywords='clamav django storage s3 backend'
 )

@@ -29,30 +29,24 @@ class ClamAvS3Boto3Storage(S3Boto3Storage):
         Returns:
             Optional[str]: None if scan passed. Error message if scan failed.
         """
-        kwargs={}
+        kwargs = {}
 
         try:
-            clamd_settings=settings.CLAMD_CONNECTION
+            connection_settings = settings.CLAMD_CONNECTION
         except AttributeError:
             pass
         else:
+            host = connection_settings.get("host")
+            port = connection_settings.get("port")
+            timeout = connection_settings.get("timeout")
 
-        
-        
-        
-            host = clamd_settings.get('host')
-            port = clamd_settings.get('port')
-            timeout = clamd_settings.get('timeout')
-
-            
             if port:
-                kwargs['port'] = port
+                kwargs["port"] = port
             if host:
-                kwargs['host'] = host
+                kwargs["host"] = host
             if timeout:
-                kwargs['timeout'] = timeout
+                kwargs["timeout"] = timeout
 
-        
-        clamd_client = pyclamd.ClamdNetworkSocket(**kwargs)
-        scan_result_msg = clamd_client.scan_stream(content)
+        client = pyclamd.ClamdNetworkSocket(**kwargs)
+        scan_result_msg = client.scan_stream(content)
         return scan_result_msg

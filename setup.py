@@ -12,7 +12,7 @@ setup(
     description='An extension of storages.backends.s3boto3.S3Boto3Storage that scans files using ClamAV pre-upload.',
     long_description='README.md',
     install_requires=[
-        'Django < 4.0.0,>=3.0.0',
+        'Django < 4.0.0,>=3.2.17',
         'pyClamd==0.4.0',
         'django-storages==1.13.2',
         'boto3 > 1.20.*',

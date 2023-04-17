@@ -1,4 +1,5 @@
 from typing import Optional
+from django.conf import settings
 from storages.backends.s3boto3 import S3Boto3Storage
 import pyclamd
 
@@ -28,6 +29,30 @@ class ClamAvS3Boto3Storage(S3Boto3Storage):
         Returns:
             Optional[str]: None if scan passed. Error message if scan failed.
         """
-        clamd_client = pyclamd.ClamdAgnostic()
+        kwargs={}
+
+        try:
+            clamd_settings=settings.CLAMD_CONNECTION
+        except AttributeError:
+            pass
+        else:
+
+        
+        
+        
+            host = clamd_settings.get('host')
+            port = clamd_settings.get('port')
+            timeout = clamd_settings.get('timeout')
+
+            
+            if port:
+                kwargs['port'] = port
+            if host:
+                kwargs['host'] = host
+            if timeout:
+                kwargs['timeout'] = timeout
+
+        
+        clamd_client = pyclamd.ClamdNetworkSocket(**kwargs)
         scan_result_msg = clamd_client.scan_stream(content)
         return scan_result_msg

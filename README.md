@@ -3,7 +3,7 @@ An extension of `storages.backends.s3boto3.S3Boto3Storage` that scans files usin
 
 ## Prerequisites
 
-The ``clamav-daemon`` must be running on the local machine.
+A `clamav` server must be running and a connection available to the Django app.
 
 ## Installation
 
@@ -15,6 +15,18 @@ or install using pip:
 ## Configuration
 
 This storage backend is a drop in replacement for `S3Boto3Storage`.
+
+Connection parameters to the clamav server can be changed by setting the Django setting CLAMD_CONNECTION to a dictionary containing configuration parameters. Valid keys are 'host', 'port', and 'timeout'. All of these keys are optional.
+
+```
+CLAMD_CONNECTION = { 
+    "host": "notarealhost",    
+    "port": 1234,
+    "timeout": 20,
+}
+```
+
+If the CLAMD_CONNECTION setting is not defined, or one of the aforementioned keys is missing from the settings dictionary, fallback defaults are used. These defaults are defined here: https://github.com/duggan/pyclamd/blob/master/pyclamd.py#L574.
 
 ## Tests
 

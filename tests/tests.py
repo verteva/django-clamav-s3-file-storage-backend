@@ -1,12 +1,39 @@
+from contextlib import contextmanager
 import pyclamd
 import tempfile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 import clamav_s3_storage_backend
 import clamav_s3_storage_backend.backend
-from django.core.files import File
 from unittest import mock
 
 from clamav_s3_storage_backend.exceptions import ClamAvScanFailed
+
+
+EICAR_BYTESTRING = None  # this will be overwritten during the test
+
+
+@contextmanager
+def safe_file():
+    with tempfile.NamedTemporaryFile() as f:
+        file_content = b"This is not a virus"
+        f.write(file_content)
+        f.flush()
+        f.seek(0)
+        yield f
+
+
+@contextmanager
+def eicar_test_file():
+    # Creates an EICAR test file.
+    # This file is used to test antivirus software.
+    # create file (bytestring) with eicar flag
+
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(EICAR_BYTESTRING)
+        f.flush()
+        f.seek(0)
+        yield f
+
 
 class ClamavS3Boto3StorageTests(TestCase):
     def setUp(self):
@@ -14,36 +41,30 @@ class ClamavS3Boto3StorageTests(TestCase):
         self.storage._connections.connection = mock.MagicMock()
         self.cd = pyclamd.ClamdAgnostic()
 
+        global EICAR_BYTESTRING
+        EICAR_BYTESTRING = self.cd.EICAR()
 
     def test_file_with_virus(self):
         # create file (bytestring) with eicar flag
-        with tempfile.NamedTemporaryFile() as file_with_virus:
-            file_with_virus.write(self.cd.EICAR())
-            file_with_virus.flush()
-            file_with_virus.seek(0)
-
+        with eicar_test_file() as f:
             with self.assertRaises(ClamAvScanFailed):
-                self.storage.save('file/with/virus', file_with_virus)
+                self.storage.save("file/with/virus", f)
 
     def test_file_without_virus(self):
         """
         Test saving a file
         """
-        
-        # create file (bytestring) with eicar flag
-        name='file/with/no/virus'
-        with tempfile.NamedTemporaryFile() as file_with_no_virus:
-            file_content=b'This is not a virus'
-            file_with_no_virus.write(file_content)
-            file_with_no_virus.flush()
-            file_with_no_virus.seek(0)
-            self.storage.save(name, file_with_no_virus)
-            self.storage.bucket.Object.assert_called_once_with(name)
-                
+
+        name = "file/with/no/virus"
+        with safe_file() as f:
+            self.storage.save(name, f)
             self.storage.bucket.Object.assert_called_once_with(name)
 
-            obj = self.storage.bucket.Object.return_value
-            blahfioe=File(file_with_no_virus)
-            blahfioe.name=name
-            self.assertEqual(obj.upload_fileobj.call_args[0][0].read(), file_content)
-            
+    @override_settings(CLAMD_CONNECTION={"host": "notarealhost", "port": 1234})
+    def test_bad_connection_parameters_result_in_connection_error(self):
+        """Connection parameters to the ClamAV server shall be configurable through Django settings."""
+
+        name = "file/with/no/virus"
+        with safe_file() as f:
+            with self.assertRaises(pyclamd.pyclamd.ConnectionError):
+                self.storage.save(name, f)

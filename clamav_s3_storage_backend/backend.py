@@ -10,17 +10,17 @@ class ClamAvS3Boto3Storage(S3Boto3Storage):
     """Storage backend that scans the file for viruses prior to uploading."""
 
     def _save(self, name, content):
-        scan_result_msg = self._scan_content(content)
-        scan_passed = scan_result_msg is None
+        virus_scan_result_msg = self._run_virus_scan(content)
+        virus_scan_passed = virus_scan_result_msg is None
 
-        if scan_passed:
+        if virus_scan_passed:
             return super()._save(name, content)
         else:
             raise ClamAvScanFailed(
-                f"Not uploading file. Virus scan failed. Message: {scan_result_msg}"
+                f"Not uploading file. Virus scan failed. Message: {virus_scan_result_msg}"
             )
 
-    def _scan_content(self, content) -> Optional[str]:
+    def _run_virus_scan(self, content) -> Optional[str]:
         """Scan the provided filelike content
 
         Args:
@@ -49,4 +49,5 @@ class ClamAvS3Boto3Storage(S3Boto3Storage):
 
         client = pyclamd.ClamdNetworkSocket(**kwargs)
         scan_result_msg = client.scan_stream(content)
+        content.seek(0) 
         return scan_result_msg
